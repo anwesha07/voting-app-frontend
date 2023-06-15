@@ -1,6 +1,9 @@
 import { Route, Routes } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
+
 import PrivateRoutes from './components/PrivateRoutes';
 import Homepage from './components/Homepage';
 import VoteEvents from './components/VoteEvents';
@@ -9,6 +12,8 @@ import Candidates from './components/Candidates';
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(null);
   const [user, setUser] = useState(null);
+
+  const notify = (message) => toast.error(message);
 
   useEffect(() => {
     // verify user login
@@ -49,6 +54,7 @@ function App() {
       })
       .catch((error) => {
         console.log(error);
+        notify('Something went wrong!');
       });
   };
 
@@ -57,14 +63,21 @@ function App() {
   }
 
   return (
-    <Routes>
-      <Route path="/" element={<Homepage setUser={setUser} setIsLoggedIn={setIsLoggedIn} isLoggedIn={isLoggedIn} />} />
-      {/* eslint-disable-next-line max-len */}
-      <Route element={<PrivateRoutes isLoggedIn={isLoggedIn} user={user} handleLogout={handleLogout} />}>
-        <Route path="/events" element={<VoteEvents user={user} />} />
-        <Route path="/events/:id" element={<Candidates user={user} />} />
-      </Route>
-    </Routes>
+    <>
+      <ToastContainer />
+      <Routes>
+        <Route
+          path="/"
+          // eslint-disable-next-line max-len
+          element={<Homepage setUser={setUser} setIsLoggedIn={setIsLoggedIn} isLoggedIn={isLoggedIn} />}
+        />
+        {/* eslint-disable-next-line max-len */}
+        <Route element={<PrivateRoutes isLoggedIn={isLoggedIn} user={user} handleLogout={handleLogout} />}>
+          <Route path="/events" element={<VoteEvents user={user} />} />
+          <Route path="/events/:id" element={<Candidates user={user} />} />
+        </Route>
+      </Routes>
+    </>
   );
 }
 

@@ -1,16 +1,29 @@
 import axios from 'axios';
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 
 function Login(props) {
   const { setUser, setIsLoggedIn, setUserRegistered } = props;
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
   const [formErrors, setFormErrors] = useState({
     emailError: '',
     passwordError: '',
   });
+  const notify = (message) => {
+    toast.error(message, {
+      position: 'top-center',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  };
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
@@ -29,39 +42,42 @@ function Login(props) {
     const errors = {};
     if (!isValidEmail(email)) {
       errors.emailError = 'Invalid email';
-    } else {
-      errors.emailError = '';
     }
+
     if (password.length < 8) {
       errors.passwordError = 'Password should be at least 8 characters long';
-    } else {
-      errors.passwordError = '';
     }
 
     setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    validateForm();
-    // Perform API call or further validation here
-    // Replace the API_URL with your actual API endpoint
-    const data = {
-      email,
-      password,
-    };
-    // console.log(data);
-    axios
-      .post(`${process.env.REACT_APP_SERVER_URL}/api/auth/login`, data)
-      .then((res) => {
-        const { token, ...newUser } = res.data;
-        localStorage.setItem('TOKEN', token);
-        setUser(newUser);
-        setIsLoggedIn(true);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    const isFormValid = validateForm();
+    if (isFormValid) {
+      // Perform API call or further validation here
+      const data = {
+        email,
+        password,
+      };
+      // console.log(data);
+      axios
+        .post(`${process.env.REACT_APP_SERVER_URL}/api/auth/login`, data)
+        .then((res) => {
+          const { token, ...newUser } = res.data;
+          localStorage.setItem('TOKEN', token);
+          setUser(newUser);
+          setIsLoggedIn(true);
+        })
+        .catch((err) => {
+          console.log(err);
+          if (!err.response) notify('Something went wrong!');
+          else if (err.response.status === 400) notify(err.response.data.message);
+          else if (err.response.status === 401) notify('Wrong Credentials!');
+          else notify('Something went wrong!');
+        });
+    }
   };
 
   return (

@@ -3,11 +3,24 @@ import axios from 'axios';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 function VoteEvents(props) {
   const { user } = props;
   const [events, setEvents] = useState([]);
   const navigate = useNavigate();
+
+  const notify = (message) => {
+    toast.error(message, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  };
 
   useEffect(() => {
     // fetch the current voting events
@@ -24,6 +37,7 @@ function VoteEvents(props) {
       })
       .catch((err) => {
         console.log(err.response);
+        notify('Something went wrong!');
       });
   }, []);
 
@@ -56,6 +70,7 @@ function VoteEvents(props) {
               </button>
             </div>
           ))}
+          {events.length === 0 ? <div>No voting events to show!</div> : null}
         </div>
       </div>
     </div>

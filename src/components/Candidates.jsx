@@ -1,14 +1,28 @@
 /* eslint-disable no-underscore-dangle */
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 function Candidates() {
   const { id } = useParams();
   const [candidates, setCandidates] = useState([]);
   const [event, setEvent] = useState(null);
   const [hasUserVoted, setHasUserVoted] = useState(false);
-  console.log(id);
+  const navigate = useNavigate();
+
+  const notify = (message) => {
+    toast.error(message, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  };
+
   useEffect(() => {
     const config = {
       headers: {
@@ -26,6 +40,8 @@ function Candidates() {
       })
       .catch((err) => {
         console.log(err.response);
+        notify('Something went wrong!');
+        navigate('/events');
       });
   }, []);
 
@@ -44,7 +60,8 @@ function Candidates() {
         setHasUserVoted(true);
       })
       .catch((error) => {
-        console.log(error.response.data);
+        console.log(error);
+        notify('Sorry! Failed to cast your vote. Try again!');
       });
   };
 

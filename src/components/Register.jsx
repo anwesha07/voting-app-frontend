@@ -1,6 +1,7 @@
 import axios from 'axios';
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 
 function Register(props) {
   const { setUser, setIsLoggedIn, setUserRegistered } = props;
@@ -13,12 +14,6 @@ function Register(props) {
     confirmPassword: '',
   });
 
-  // const [userName, setUserName] = useState('');
-  // const [email, setEmail] = useState('');
-  // const [aadhar, setAadhar] = useState('');
-  // const [password, setPassword] = useState('');
-  // const [confirmPassword, setConfirmPassword] = useState()
-
   const [formErrors, setFormErrors] = useState({
     userNameError: '',
     emailError: '',
@@ -26,7 +21,18 @@ function Register(props) {
     passwordError: '',
     confirmPasswordError: '',
   });
-  const [isFormValid, setIsFormValid] = useState(false);
+
+  const notify = (message) => {
+    toast.error(message, {
+      position: 'top-center',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  };
 
   const handleChange = (event) => {
     setFormData((prevFormData) => ({
@@ -75,13 +81,13 @@ function Register(props) {
     }
 
     setFormErrors(errors);
-    setIsFormValid(Object.keys(errors).length === 0);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     // validate fields entered
-    validateForm();
+    const isFormValid = validateForm();
     if (isFormValid) {
       console.log(formData);
       axios
@@ -94,8 +100,11 @@ function Register(props) {
           console.log(newUser);
           setIsLoggedIn(true);
         })
-        .catch((error) => {
-          console.log(error);
+        .catch((err) => {
+          if (!err.response) notify('Something went wrong!');
+          else if (err.response.status === 400) notify(err.response.data.message);
+          else if (err.response.status === 409) notify('User already exists!');
+          else notify('Something went wrong!');
         });
     }
   };
