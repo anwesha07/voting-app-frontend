@@ -65,7 +65,13 @@ function VoteEvents(props) {
 VoteEvents.propTypes = {
   user: PropTypes.shape({
     userName: PropTypes.string.isRequired,
-  }).isRequired,
+  }),
+};
+
+VoteEvents.defaultProps = {
+  user: {
+    userName: 'Guest',
+  },
 };
 
 export default VoteEvents;

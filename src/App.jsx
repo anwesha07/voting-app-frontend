@@ -28,10 +28,29 @@ function App() {
       .catch((error) => {
         console.log(error);
         setIsLoggedIn(false);
-        localStorage.removeItem('TOKEN');
         setUser(null);
+        localStorage.removeItem('TOKEN');
       });
   }, []);
+
+  const handleLogout = () => {
+    const TOKEN = localStorage.getItem('TOKEN');
+    const config = {
+      headers: {
+        'x-token': TOKEN,
+      },
+    };
+    axios
+      .post(`${process.env.REACT_APP_SERVER_URL}/api/auth/logout`, {}, config)
+      .then(() => {
+        setIsLoggedIn(false);
+        localStorage.removeItem('TOKEN');
+        setUser(null);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   if (isLoggedIn === null) {
     return <div className="flex justify-center grow items-center h-screen bg-gray-100">Loading...</div>;
@@ -40,7 +59,8 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Homepage setUser={setUser} setIsLoggedIn={setIsLoggedIn} isLoggedIn={isLoggedIn} />} />
-      <Route element={<PrivateRoutes isLoggedIn={isLoggedIn} user={user} />}>
+      {/* eslint-disable-next-line max-len */}
+      <Route element={<PrivateRoutes isLoggedIn={isLoggedIn} user={user} handleLogout={handleLogout} />}>
         <Route path="/events" element={<VoteEvents user={user} />} />
         <Route path="/events/:id" element={<Candidates user={user} />} />
       </Route>
